@@ -1,9 +1,14 @@
 // ignore_for_file: prefer_final_fields
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:wellnest_doctor/Application/home/home_cubit.dart';
+import 'package:wellnest_doctor/Domain/Failure/failure.dart';
 import 'package:wellnest_doctor/Presentation/Messages/chat.dart';
+import 'package:wellnest_doctor/Presentation/common_widgets/snacbar.dart';
 import 'package:wellnest_doctor/Presentation/constants/constants.dart';
 
 // ignore: must_be_immutable
@@ -18,6 +23,20 @@ class HomePage extends StatelessWidget {
   String? token;
   @override
   Widget build(BuildContext context) {
+    // WidgetsBinding.instance.addPostFrameCallback((timestamp) {
+    //   final bloc = BlocProvider.of<HomeCubit>(context).state;
+    //   bloc.isFailureOrSuccess.fold(
+    //     () {
+    //       BlocProvider.of<HomeCubit>(context).getDetails();
+    //     },
+    //     (either) => either.fold(
+    //       (failure) {
+    //         BlocProvider.of<HomeCubit>(context).getDetails();
+    //       },
+    //       (r) {},
+    //     ),
+    //   );
+    // });
     final size = MediaQuery.of(context).size.width;
     String getGreeting() {
       final hour = DateTime.now().hour;
@@ -53,13 +72,59 @@ class HomePage extends StatelessWidget {
                         fontSize: 17,
                         fontWeight: FontWeight.w400,
                       ))),
-                  Text('Dr. John Doe',
-                      style: GoogleFonts.poppins(
-                          textStyle: const TextStyle(
-                        color: Colors.black,
-                        fontSize: 19,
-                        fontWeight: FontWeight.w600,
-                      ))),
+                  BlocConsumer<HomeCubit, HomeState>(
+                    listener: (context, state) {
+                      state.isFailureOrSuccess.fold(
+                        () {},
+                        (either) => either.fold(
+                          (failure) {
+                            if (!state.isLoading) {
+                              if (failure ==
+                                  const MainFailure.serverFailure()) {
+                                displaySnackBar(
+                                    context: context, text: "Server is down");
+                              } else if (failure ==
+                                  const MainFailure.clientFailure()) {
+                                displaySnackBar(
+                                    context: context,
+                                    text: "Something wrong with your network");
+                              } else {
+                                displaySnackBar(
+                                    context: context,
+                                    text: "Something Unexpected Happened");
+                              }
+                            }
+                          },
+                          (r) {},
+                        ),
+                      );
+                    },
+                    builder: (context, state) {
+                      if (state.isLoading) {
+                        return Shimmer.fromColors(
+                          baseColor: const Color.fromARGB(255, 0, 0, 0),
+                          highlightColor:
+                              const Color.fromARGB(255, 207, 207, 207),
+                          child: Container(
+                            width: size * 0.45,
+                            height: 20,
+                            decoration: const BoxDecoration(
+                              color: Color.fromARGB(34, 0, 0, 0),
+                            ),
+                          ),
+                        );
+                      }
+                      return state.homeModel == null
+                          ? const SizedBox()
+                          : Text(state.homeModel!.name!,
+                              style: GoogleFonts.poppins(
+                                  textStyle: TextStyle(
+                                color: Colors.white,
+                                fontSize: size * 0.044,
+                                fontWeight: FontWeight.w600,
+                              )));
+                    },
+                  ),
                 ],
               ),
             ),
