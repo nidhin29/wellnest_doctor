@@ -65,10 +65,11 @@ class ProfileRepo implements ProfileService {
           .put("${baseUrl}api/DoctorProfile", data: {
         'email': email,
         'name': profileModel.name,
-        // 'age': profileModel.age,
-        // 'gender': profileModel.gender,
-        // 'address': profileModel.weightAddress,
-        // 'api_key': profileModel.facebookApi,
+        'patents':int.parse(profileModel.patients),
+        'experence':int.parse( profileModel.experience),
+        'specialization': profileModel.specialization,
+        'education': profileModel.education,
+        'about': profileModel.about,
       });
       if (response.statusCode == 200 || response.statusCode == 201) {
         log(response.data.toString());

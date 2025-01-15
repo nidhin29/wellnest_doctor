@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:wellnest_doctor/Application/home/home_cubit.dart';
@@ -23,20 +24,22 @@ class HomePage extends StatelessWidget {
   String? token;
   @override
   Widget build(BuildContext context) {
-    // WidgetsBinding.instance.addPostFrameCallback((timestamp) {
-    //   final bloc = BlocProvider.of<HomeCubit>(context).state;
-    //   bloc.isFailureOrSuccess.fold(
-    //     () {
-    //       BlocProvider.of<HomeCubit>(context).getDetails();
-    //     },
-    //     (either) => either.fold(
-    //       (failure) {
-    //         BlocProvider.of<HomeCubit>(context).getDetails();
-    //       },
-    //       (r) {},
-    //     ),
-    //   );
-    // });
+    WidgetsBinding.instance.addPostFrameCallback((timestamp) {
+      BlocProvider.of<HomeCubit>(context)
+          .viewBookings(DateTime.now().toString().substring(0, 10));
+      final bloc = BlocProvider.of<HomeCubit>(context).state;
+      bloc.isFailureOrSuccess.fold(
+        () {
+          BlocProvider.of<HomeCubit>(context).getDetails();
+        },
+        (either) => either.fold(
+          (failure) {
+            BlocProvider.of<HomeCubit>(context).getDetails();
+          },
+          (r) {},
+        ),
+      );
+    });
     final size = MediaQuery.of(context).size.width;
     String getGreeting() {
       final hour = DateTime.now().hour;
@@ -178,6 +181,9 @@ class HomePage extends StatelessWidget {
                       _timeSelected.value = false;
                       _currentIndex.value = null;
                     }
+
+                    BlocProvider.of<HomeCubit>(context)
+                        .viewBookings(selectedDay.toString().substring(0, 10));
                   },
                 ),
               );
@@ -186,28 +192,188 @@ class HomePage extends StatelessWidget {
           kheight20,
           Padding(
             padding: EdgeInsets.all(size * 0.07),
-            child: SizedBox(
-              height: size * 0.4,
-              child: ListView.separated(
-                  shrinkWrap: true,
-                  scrollDirection: Axis.horizontal,
-                  itemBuilder: (context, index) {
-                    return GestureDetector(
-                      onTap: () {
-                        Navigator.of(context).push(MaterialPageRoute(
-                            builder: (context) => const ChatPage()));
+            child: BlocConsumer<HomeCubit, HomeState>(
+              listener: (context, state) {
+                state.isFailureOrSuccessViewBookings.fold(
+                  () {},
+                  (either) => either.fold(
+                    (failure) {
+                      if (!state.isLoading) {
+                        if (failure == const MainFailure.serverFailure()) {
+                          displaySnackBar(
+                              context: context, text: "Server is down");
+                        } else if (failure ==
+                            const MainFailure.clientFailure()) {
+                          displaySnackBar(
+                              context: context,
+                              text: "Something wrong with your network");
+                        } else {
+                          displaySnackBar(
+                              context: context,
+                              text: "Something Unexpected Happened");
+                        }
+                      }
+                    },
+                    (r) {},
+                  ),
+                );
+
+                state.isFailureOrSuccessStartChat.fold(() {}, (either) {
+                  either.fold((l) {}, (r) {
+                    Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) => ChatPage(
+                              id: r.room!,
+                              name: r.clintName!,
+                            )));
+                  });
+                });
+              },
+              builder: (context, state) {
+                if (state.isLoadingViewBookings) {
+                  return SizedBox(
+                    height: size * 0.4,
+                    child: ListView.separated(
+                      separatorBuilder: (context, index) => kwidth10,
+                      shrinkWrap: true,
+                      scrollDirection: Axis.horizontal,
+                      itemBuilder: (context, index) {
+                        return Shimmer.fromColors(
+                          baseColor: const Color.fromARGB(255, 0, 0, 0),
+                          highlightColor:
+                              const Color.fromARGB(255, 207, 207, 207),
+                          child: Container(
+                            width: (size - 12) * 0.8,
+                            height: (size - 12) * 0.4,
+                            decoration: BoxDecoration(
+                              color: const Color.fromARGB(34, 0, 0, 0),
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                          ),
+                        );
                       },
-                      child: AppointmentTileWidget(
-                          size: size,
-                          name: 'Nidhin V Ninan',
-                          date: 'Monday July 13',
-                          time: '10:00 AM'),
+                      itemCount: 5,
+                    ),
+                  );
+                }
+
+                return state.isFailureOrSuccessViewBookings.fold(
+                  () {
+                    return Center(
+                      child: Text(
+                        'No Appointments',
+                        style: GoogleFonts.poppins(
+                            textStyle: const TextStyle(
+                          color: Colors.black,
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                        )),
+                        softWrap: true,
+                        textAlign: TextAlign.center,
+                      ),
                     );
                   },
-                  separatorBuilder: (context, index) {
-                    return kwidth10;
-                  },
-                  itemCount: 5),
+                  (either) => either.fold(
+                    (failure) {
+                      return Center(
+                        child: Text(
+                          'No Appointments',
+                          style: GoogleFonts.poppins(
+                              textStyle: const TextStyle(
+                            color: Colors.black,
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                          )),
+                          softWrap: true,
+                          textAlign: TextAlign.center,
+                        ),
+                      );
+                    },
+                    (r) {
+                      return r.isEmpty
+                          ? Center(
+                              child: Text(
+                                'No Appointments',
+                                style: GoogleFonts.poppins(
+                                    textStyle: const TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.bold,
+                                )),
+                                softWrap: true,
+                                textAlign: TextAlign.center,
+                              ),
+                            )
+                          : SizedBox(
+                              height: size * 0.4,
+                              child: ListView.separated(
+                                  shrinkWrap: true,
+                                  scrollDirection: Axis.horizontal,
+                                  itemBuilder: (context, index) {
+                                    DateTime dateTime =
+                                        DateTime.parse(r[index].datetime!);
+                                    DateTime time =
+                                        DateTime.parse(r[index].bookdate!);
+                                    String formattedDate =
+                                        DateFormat('yyyy-MM-dd').format(time);
+                                    String formattedTime =
+                                        DateFormat('hh:mm a').format(dateTime);
+                                    return GestureDetector(
+                                      onTap: () {
+                                        DateTime now = DateTime.now();
+                                        String currentDate =
+                                            DateFormat('yyyy-MM-dd')
+                                                .format(now);
+                                        String currentTime =
+                                            DateFormat('hh:mm a').format(now);
+                                        if (currentDate == formattedDate &&
+                                            currentTime == formattedTime) {
+                                          BlocProvider.of<HomeCubit>(context)
+                                              .startChat(
+                                                  r[index].id.toString());
+                                        } else {
+                                          displaySnackBar(
+                                              context: context,
+                                              text:
+                                                  "You can only chat with the user at the time of appointment");
+                                        }
+                                      },
+                                      child: GestureDetector(
+                                        onTap: () {
+                                          DateTime now = DateTime.now();
+                                          String currentDate =
+                                              DateFormat('yyyy-MM-dd')
+                                                  .format(now);
+                                          String currentTime =
+                                              DateFormat('hh:mm a').format(now);
+                                          if (currentDate == formattedDate &&
+                                              currentTime == formattedTime) {
+                                            BlocProvider.of<HomeCubit>(context)
+                                                .startChat(
+                                                    r[index].id.toString());
+                                          } else {
+                                            displaySnackBar(
+                                                context: context,
+                                                text:
+                                                    "You can only chat with the user at the time of appointment");
+                                          }
+                                        },
+                                        child: AppointmentTileWidget(
+                                            size: size - 12,
+                                            name: r[index].user!,
+                                            date: formattedDate,
+                                            time: formattedTime),
+                                      ),
+                                    );
+                                  },
+                                  separatorBuilder: (context, index) {
+                                    return kwidth10;
+                                  },
+                                  itemCount: r.length),
+                            );
+                    },
+                  ),
+                );
+              },
             ),
           ),
         ],

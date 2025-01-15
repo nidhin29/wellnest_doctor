@@ -32,7 +32,7 @@ class IntroPage extends StatelessWidget {
               Positioned(
                 top: size * 0.01,
                 right: size * 0.06,
-                child: Text('hello\n doc',
+                child: Text('',
                     textAlign: TextAlign.right,
                     style: TextStyle(
                         fontSize: size * 0.09,

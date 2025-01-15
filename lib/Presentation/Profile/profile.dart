@@ -186,16 +186,19 @@ class ProfilePage extends StatelessWidget {
                                 ))),
                         SizedBox(
                           width: size * 0.8,
-                          child: Text(
-                            'MBBS (International Medical University, Malaysia), MRCP (Royal College of Physicians, United Kingdom)',
-                            style: GoogleFonts.poppins(
-                                textStyle: const TextStyle(
-                              color: Color.fromARGB(255, 112, 111, 111),
-                              fontSize: 15,
-                            )),
-                            softWrap: true,
-                            textAlign: TextAlign.center,
-                          ),
+                          child: state.profileModel!.about == null ||
+                                  state.profileModel!.about == ''
+                              ? const SizedBox()
+                              : Text(
+                                  state.profileModel!.about!,
+                                  style: GoogleFonts.poppins(
+                                      textStyle: const TextStyle(
+                                    color: Color.fromARGB(255, 112, 111, 111),
+                                    fontSize: 15,
+                                  )),
+                                  softWrap: true,
+                                  textAlign: TextAlign.center,
+                                ),
                         ),
                       ],
                     );

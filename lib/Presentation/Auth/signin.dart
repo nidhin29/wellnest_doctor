@@ -4,7 +4,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:wellnest_doctor/Application/profile/profile_cubit.dart';
 import 'package:wellnest_doctor/Application/signin/signin_cubit.dart';
 import 'package:wellnest_doctor/Domain/Failure/failure.dart';
-import 'package:wellnest_doctor/Presentation/Auth/signup.dart';
 import 'package:wellnest_doctor/Presentation/Home/mainmenu.dart';
 import 'package:wellnest_doctor/Presentation/common_widgets/snacbar.dart';
 import 'package:wellnest_doctor/Presentation/constants/constants.dart';
@@ -46,11 +45,11 @@ class LoginPage extends StatelessWidget {
                 }
               },
               (r) {
-               Navigator.of(context).pushAndRemoveUntil(
-                        MaterialPageRoute(
-                          builder: (context) => MainScreenPage(),
-                        ),
-                        (route) => false);
+                Navigator.of(context).pushAndRemoveUntil(
+                    MaterialPageRoute(
+                      builder: (context) => MainScreenPage(),
+                    ),
+                    (route) => false);
               },
             ),
           );
@@ -231,34 +230,10 @@ class LoginPage extends StatelessWidget {
                   ),
                 ),
                 kheight5,
-                Padding(
-                  padding: EdgeInsets.only(left: size * 0.18),
-                  child: Row(
-                    children: [
-                      const Text(
-                        'Don\'t have an account?',
-                        style: TextStyle(
-                            color: Colors.grey,
-                            fontSize: 15,
-                            fontWeight: FontWeight.w400),
-                      ),
-                      TextButton(
-                          onPressed: () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (context) => SignUpPage(),
-                              ),
-                            );
-                          },
-                          child: const Text(
-                            'Sign Up',
-                            style: TextStyle(color: maincolor),
-                          )),
-                    ],
-                  ),
-                ),
                 kheight10,
                 kheight10,
+                kwidth30,
+                kheight50
               ],
             );
           },

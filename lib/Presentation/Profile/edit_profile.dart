@@ -16,26 +16,14 @@ class EditProfileScreen extends StatefulWidget {
 }
 
 class _EditProfileScreenState extends State<EditProfileScreen> {
-   final TextEditingController _nameController =
-      TextEditingController(text: "XXXX");
-
+  final TextEditingController _nameController = TextEditingController();
   final TextEditingController _specializationController =
-      TextEditingController(text: "XXXX");
-
-  final TextEditingController _experienceController =
-      TextEditingController(text: "00");
-
+      TextEditingController();
+  final TextEditingController _experienceController = TextEditingController();
   final TextEditingController _patientsTreatedController =
-      TextEditingController(text: "00");
-
-  final TextEditingController _educationController =
-      TextEditingController(text: "XXXX");
-
-  final TextEditingController _currentHospitalController =
-      TextEditingController(text: "XXXX");
-
-  final TextEditingController _aboutController =
-      TextEditingController(text: "XXXX");
+      TextEditingController();
+  final TextEditingController _educationController = TextEditingController();
+  final TextEditingController _aboutController = TextEditingController();
 
   @override
   void initState() {
@@ -67,7 +55,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             },
             (r) {
               BlocProvider.of<ProfileCubit>(context).getProfile();
-             // BlocProvider.of<HomeCubit>(context).getDetails();
               Navigator.of(context).pop();
             },
           ),
@@ -101,7 +88,15 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     }
                   }
                 },
-                (r) {},
+                (r) {
+                  _nameController.text = r.name ?? "XXXX";
+                  _specializationController.text = r.specialization ?? "XXXX";
+                  _experienceController.text = r.experence ?? "00";
+                  _patientsTreatedController.text =
+                      r.patents?.toString() ?? "00";
+                  _educationController.text = r.education ?? "XXXX";
+                  _aboutController.text = r.about ?? "XXXX";
+                },
               ),
             );
           },
@@ -114,44 +109,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               );
             }
 
-            state.isFailureOrSuccessForGet.fold(() {
-              return const Center(child: Text('Error...'));
-            }, (either) {
-              either.fold((failure) {
-                if (failure == const MainFailure.clientFailure()) {
-                  return const Center(child: Text('Network Error...'));
-                } else if (failure == const MainFailure.serverFailure()) {
-                  return const Center(child: Text('Server Error...'));
-                } else {
-                  const Center(child: Text('Impossible Error...'));
-                }
-              }, (r) {
-                _nameController.text =
-                    r.name == null || r.name == '' ? "XXXX" : r.name!;
-                // _specializationController.text = r.specialization == null ||
-                //         r.specialization == ''
-                //     ? "XXXX"
-                //     : r.specialization!;
-                // _experienceController.text = r.experience == null ||
-                //         r.experience == ''
-                //     ? "00"
-                //     : r.experience!;
-                // _patientsTreatedController.text = r.patientsTreated == null ||
-                //         r.patientsTreated == ''
-                //     ? "00"
-                //     : r.patientsTreated!;
-                // _educationController.text = r.education == null || r.education == ''
-                //     ? "XXXX"
-                //     : r.education!;
-                // _currentHospitalController.text = r.currentHospital == null ||
-                //         r.currentHospital == ''
-                //     ? "XXXX"
-                //     : r.currentHospital!;
-                // _aboutController.text = r.about == null || r.about == ''
-                //     ? "XXXX"
-                //     : r.about!;
-              });
-            });
             return Scaffold(
               appBar: AppBar(
                 leading: IconButton(
@@ -178,11 +135,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                             .updateProfile(
                                 profileModel: ProfileModel(
                                     name: _nameController.text,
-                                    specialization: _specializationController.text,
+                                    specialization:
+                                        _specializationController.text,
                                     experience: _experienceController.text,
                                     patients: _patientsTreatedController.text,
                                     education: _educationController.text,
-                                    currentWorkingHospital: _currentHospitalController.text,
                                     about: _aboutController.text));
                       },
                       child: const Text(
@@ -196,49 +153,45 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 ],
               ),
               body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 50),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const SizedBox(
-                height: 40,
+                padding: const EdgeInsets.symmetric(horizontal: 50),
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      const SizedBox(
+                        height: 40,
+                      ),
+                      _TextFieldWithTitle(
+                        title: "Name",
+                        controller: _nameController,
+                      ),
+                      _TextFieldWithTitle(
+                        title: "Specialization",
+                        controller: _specializationController,
+                      ),
+                      _TextFieldWithTitle(
+                        title: "Experience",
+                        controller: _experienceController,
+                      ),
+                      _TextFieldWithTitle(
+                        title: "Patients Treated",
+                        controller: _patientsTreatedController,
+                      ),
+                      _TextFieldWithTitle(
+                        title: "Education",
+                        controller: _educationController,
+                      ),
+                      _TextFieldWithTitle(
+                        title: "About",
+                        controller: _aboutController,
+                      ),
+                      const SizedBox(
+                        height: 60,
+                      ),
+                    ],
+                  ),
+                ),
               ),
-              _TextFieldWithTitle(
-                title: "Name",
-                controller: _nameController,
-              ),
-              _TextFieldWithTitle(
-                title: "Specialization",
-                controller: _specializationController,
-              ),
-              _TextFieldWithTitle(
-                title: "Experience",
-                controller: _experienceController,
-              ),
-              _TextFieldWithTitle(
-                title: "Patients Treated",
-                controller: _patientsTreatedController,
-              ),
-              _TextFieldWithTitle(
-                title: "Education",
-                controller: _educationController,
-              ),
-              _TextFieldWithTitle(
-                title: "Current Working Hoapital",
-                controller: _currentHospitalController,
-              ),
-              _TextFieldWithTitle(
-                title: "About",
-                controller: _aboutController,
-              ),
-              const SizedBox(
-                height: 60,
-              ),
-            ],
-          ),
-        ),
-      ),
             );
           },
         );
@@ -270,63 +223,6 @@ class _TextFieldWithTitle extends StatelessWidget {
         const SizedBox(
           height: 25,
         )
-      ],
-    );
-  }
-}
-
-class _DropdownWithTitle extends StatefulWidget {
-  final String title;
-  final List<String> items;
-  final ValueNotifier<String> selectedValue;
-
-  const _DropdownWithTitle(
-      {required this.title, required this.items, required this.selectedValue});
-
-  @override
-  _DropdownWithTitleState createState() => _DropdownWithTitleState();
-}
-
-class _DropdownWithTitleState extends State<_DropdownWithTitle> {
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          widget.title,
-          style: const TextStyle(
-              fontSize: 14, fontWeight: FontWeight.w400, height: 0.1),
-        ),
-        ValueListenableBuilder(
-            valueListenable: widget.selectedValue,
-            builder: (context, value, child) {
-              return DropdownButton<String>(
-                isExpanded: true,
-                value: widget.selectedValue.value,
-                underline: Container(
-                  height: 1,
-                  color: Colors.grey,
-                ),
-                onChanged: (String? newValue) {
-                  setState(() {
-                    widget.selectedValue.value = newValue!;
-                  });
-                },
-                items:
-                    widget.items.map<DropdownMenuItem<String>>((String value) {
-                  return DropdownMenuItem<String>(
-                    value: value,
-                    child: Text(value,
-                        style: const TextStyle(
-                            fontSize: 15, fontWeight: FontWeight.w600)),
-                  );
-                }).toList(),
-              );
-            }),
-        const SizedBox(
-          height: 25,
-        ),
       ],
     );
   }
